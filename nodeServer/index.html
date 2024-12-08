@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Arduino Control</title>
+    <style>
+        .toggle-button {
+            padding: 20px 40px;
+            font-size: 18px;
+            margin: 20px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        .toggle-off {
+            background-color: #ff4444;
+            color: white;
+        }
+        .toggle-on {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <button id="toggleButton" class="toggle-button toggle-off">OFF</button>
+
+    <script>
+        const button = document.getElementById('toggleButton');
+        const ws = new WebSocket('ws://localhost:3000');
+        let isOn = false;
+
+        ws.onopen = () => {
+            console.log('Connected to WebSocket server');
+        };
+
+        ws.onmessage = (event) => {
+            const message = JSON.parse(event.data);
+            console.log('Received:', message);
+        };
+
+        function updateButtonState() {
+            button.textContent = isOn ? 'ON' : 'OFF';
+            button.className = `toggle-button ${isOn ? 'toggle-on' : 'toggle-off'}`;
+        }
+
+        button.addEventListener('click', () => {
+            isOn = !isOn;
+            updateButtonState();
+
+            fetch('http://localhost:3000/send-trigger', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ state: isOn ? 1 : 0 })
+            })
+            .then(response => response.json())
+            .then(data => console.log('Response:', data))
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>

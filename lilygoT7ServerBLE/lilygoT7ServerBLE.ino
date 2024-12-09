@@ -7,6 +7,8 @@
 #define CHARACTERISTIC_UUID "19B10001-E8F2-537E-4F6C-D104768A1214"
 #define LED_PIN 17
 
+int motorPin = 10;
+
 BLEServer* pServer = NULL;
 BLECharacteristic* pCharacteristic = NULL;
 bool deviceConnected = false;
@@ -37,6 +39,9 @@ class MyCallbacks: public BLECharacteristicCallbacks {
         
         if (receivedValue == '0' || receivedValue == '1') {
           digitalWrite(LED_PIN, receivedValue == '1' ? HIGH : LOW);
+          digitalWrite(motorPin, HIGH);
+          delay(200);
+          digitalWrite(motorPin, LOW);
           Serial.println(receivedValue == '1' ? "LED ON" : "LED OFF");
         }
 
@@ -47,6 +52,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
 void setup() {
   Serial.begin(115200);
   pinMode(LED_PIN, OUTPUT);
+  pinMode(motorPin, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
 
   // Create the BLE Device
